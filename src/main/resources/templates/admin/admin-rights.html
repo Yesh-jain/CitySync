@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/variables.css" rel="stylesheet">
+    <link href="/css/rights-pages.css" rel="stylesheet">
+    <link href="/css/navbar.css" rel="stylesheet">
+    <link href="/css/main.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Administrator Rights</title>
+</head>
+<body>
+    <div th:replace="fragments/nav-admin :: navbar-admin"></div>
+
+    <h1 class="rights-header">Administrator Dashboard</h1>
+
+    <div class="rights-grid">
+        <div class="rights-card">
+            <a th:href="@{/admin/register-user}" class="rights-link">
+                <i class="fas fa-user-plus"></i>
+                Add User
+            </a>
+        </div>
+        <div class="rights-card">
+            <a th:href="@{/user/project/upload}" class="rights-link">
+                <i class="fas fa-project-diagram"></i>
+                Add Project
+            </a>
+        </div>
+        <div class="rights-card">
+            <a th:href="@{/user/showDepartments}" class="rights-link">
+                <i class="fas fa-building"></i>
+                Show Departments
+            </a>
+        </div>
+        <div class="rights-card">
+            <a th:href="@{/admin/showUsers}" class="rights-link">
+                <i class="fas fa-users"></i>
+                Show Users
+            </a>
+        </div>
+        <div class="rights-card">
+            <a th:href="@{/admin/register-department}" class="rights-link">
+                <i class="fas fa-plus-circle"></i>
+                Add Departments
+            </a>
+        </div>
+        <div class="rights-card">
+            <a th:href="@{/admin/showAllMessages}" class="rights-link">
+                <i class="fas fa-envelope"></i>
+                Show All Messages
+            </a>
+        </div>
+        <div class="rights-card">
+            <a th:href="@{/admin/showResourcePool}" class="rights-link">
+                <i class="fas fa-boxes"></i>
+                Show Resource Pool
+            </a>
+        </div>
+        <div class="rights-card">
+            <a th:href="@{/user/project/showProjects}" class="rights-link">
+                <i class="fas fa-tasks"></i>
+                Show All Projects
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

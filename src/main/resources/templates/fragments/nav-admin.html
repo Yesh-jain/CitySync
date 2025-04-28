@@ -1,0 +1,36 @@
+<!--ADMIN-->
+<nav th:fragment="navbar-admin" class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand text-white">
+            <i class="fas fa-city"></i>
+            CitySync
+        </a>
+        
+        <div class="ms-auto d-flex align-items-center">
+            <a th:href="@{/user}" class="btn btn-nav me-2 text-white">
+                <i class="fas fa-user-circle me-2"></i>
+                User Mode
+            </a>
+
+            <div class="dropdown me-2">
+                <button class="btn btn-nav dropdown-toggle text-white" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-cog me-2"></i>
+                    Actions
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" th:href="@{/admin/register-user}"><i class="fas fa-user-plus me-2"></i>Add User</a></li>
+                    <li><a class="dropdown-item" th:href="@{/admin/showUsers}"><i class="fas fa-users me-2"></i>Show Users</a></li>
+                    <li><a class="dropdown-item" th:href="@{/admin/register-department}"><i class="fas fa-building me-2"></i>Add Departments</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" th:href="@{/admin/showAllMessages}"><i class="fas fa-envelope me-2"></i>Show Messages</a></li>
+                    <li><a class="dropdown-item" th:href="@{/user/project/showProjects}"><i class="fas fa-tasks me-2"></i>Show Projects</a></li>
+                </ul>
+            </div>
+
+            <a th:href="@{/logout}" class="btn btn-logout text-white">
+                <i class="fas fa-sign-out-alt me-2"></i>
+                Logout
+            </a>
+        </div>
+    </div>
+</nav>
