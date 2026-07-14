@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/variables.css" rel="stylesheet">
+    <link href="/css/main.css" rel="stylesheet">
+    <link href="/css/navbar.css" rel="stylesheet">
+    <link href="/css/forms.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Schedule Direct Meeting - CitySync</title>
+</head>
+<body>
+    <div th:replace="fragments/nav-user :: navbar-user"></div>
+    
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h1>Schedule Direct Meeting</h1>
+            </div>
+            
+            <form th:action="@{/user/meetings/invite}" method="post" th:object="${meetingsDTO}" class="mt-4">
+                
+                <div class="form-group">
+                    <label for="projectId" class="form-label">Select Project</label>
+                    <select class="form-select" id="projectId" th:field="*{projectId}" required>
+                        <option value="">-- Choose a Project --</option>
+                        <option th:each="p : ${myProjects}" th:value="${p.projectId}" th:text="${p.projectName}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="participatingUser" class="form-label">Select Participant (Invite User)</label>
+                    <select class="form-select" id="participatingUser" th:field="*{participatingUser}" required>
+                        <option value="">-- Choose a User --</option>
+                        <option th:each="u : ${allUsers}" 
+                                th:if="${u.username != currentUser}" 
+                                th:value="${u.username}" 
+                                th:text="${u.name} + ' (' + ${u.department} + ')'"></option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="link" class="form-label">Meeting Link</label>
+                    <div class="input-group">
+                        <input type="url" class="form-control" id="link" th:field="*{link}" placeholder="https://meet.google.com/abc-defg-hij" required>
+                        <a href="https://meet.new" target="_blank" class="btn btn-secondary" style="border-top-left-radius: 0; border-bottom-left-radius: 0; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                            <i class="fas fa-video"></i> Create Meet
+                        </a>
+                    </div>
+                    <small class="text-muted mt-1 d-block" style="font-size: 0.75rem;">Click 'Create Meet' to generate a link, copy it, and paste it here.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="meetingDate" class="form-label">Meeting Date</label>
+                    <input type="date" class="form-control" id="meetingDate" th:field="*{meetingDate}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="startTime" class="form-label">Start Time</label>
+                    <input type="time" class="form-control" id="startTime" th:field="*{meetingStartTime}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="endTime" class="form-label">End Time</label>
+                    <input type="time" class="form-control" id="endTime" th:field="*{meetingEndTime}" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-calendar-plus me-2"></i>Schedule Meeting
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

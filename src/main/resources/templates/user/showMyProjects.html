@@ -42,10 +42,10 @@
                         <td th:text="${project.startDate}"></td>
                         <td th:text="${project.endDate}"></td>
                         <td>
-                             <span th:if="${project.projectStatus == T(com.IOE.cs.city_sync.enums.ProjectStatus).COMPLETED}">
+                         <span th:if="${#strings.toString(project.projectStatus) == 'COMPLETED'}">
                         <button class="btn btn-success">Finished</button>
                 </span>
-                            <span th:unless="${project.projectStatus == T(com.IOE.cs.city_sync.enums.ProjectStatus).COMPLETED}">
+                            <span th:unless="${#strings.toString(project.projectStatus) == 'COMPLETED'}">
                 <div id="responseBtn">
                     <form th:action="@{/user/messages/myProjects-Response}" method="get">
                     <input type="hidden" name="projectId" th:value="${project.projectId}">

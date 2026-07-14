@@ -22,7 +22,7 @@ public interface ProjectRepo extends JpaRepository<Project, Integer> {
     List<ProjectListDTO> showProjects();
 
     @Query("Select new com.IOE.cs.city_sync.DTOs.ProjectListDTO(p.id , p.name , d.name , p.location , p.Description , p.startDate , p.endDate, p.projectStatus) from Project p " +
-            "left join Department d ON p.department.id = d.id where p.department.id = :deptid")
+            "left join Department d ON p.department.id = d.id where (p.department.id = :deptid) OR (:deptid IS NULL AND p.department.id IS NULL)")
     List<ProjectListDTO> myProjects(@Param("deptid") Integer deptID);
 
 }

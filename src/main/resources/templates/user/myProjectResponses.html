@@ -42,7 +42,7 @@
                             <td th:text="${message.username}"></td>
                             <td>
                                 <span th:text="${message.response}"></span>
-                                <span th:if="${message.response == T(com.IOE.cs.city_sync.enums.Response).COLLAB}">
+                                <span th:if="${#strings.toString(message.response) == 'COLLAB'}">
                                     <form th:action="@{/user/meetings/inviteForm}" method="get">
                                         <input type="hidden" th:name="messageId" th:value="${message.messageId}">
                                         <button type="submit" class="btn btn-primary btn-table">

@@ -47,9 +47,13 @@ public class MeetingService {
         meetings.setMeetingEndTime(meetingsDTO.getMeetingEndTime());
         meetings.setLink(meetingsDTO.getLink());
         meetingRepo.save(meetings);
-        Message message = messageRepo.getMessageById(meetingsDTO.getMessageId());
-        message.setResponse(Response.INVITED);
-        messageRepo.save(message);
+        if (meetingsDTO.getMessageId() != null) {
+            Message message = messageRepo.getMessageById(meetingsDTO.getMessageId());
+            if (message != null) {
+                message.setResponse(Response.INVITED);
+                messageRepo.save(message);
+            }
+        }
     }
 
     public List<MeetingsDTO> getMeetingInvitation(String name) {

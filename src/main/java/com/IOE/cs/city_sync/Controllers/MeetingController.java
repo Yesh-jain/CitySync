@@ -3,6 +3,8 @@ package com.IOE.cs.city_sync.Controllers;
 
 import com.IOE.cs.city_sync.DTOs.MeetingsDTO;
 import com.IOE.cs.city_sync.Services.MeetingService;
+import com.IOE.cs.city_sync.Services.ProjectService;
+import com.IOE.cs.city_sync.Services.CSUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +19,22 @@ public class MeetingController {
 
     @Autowired
     private MeetingService meetingService;
+
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private CSUserService csUserService;
+
+    @GetMapping("/createDirect")
+    public String createDirect(Principal user, Model model) {
+        MeetingsDTO meetingsDTO = new MeetingsDTO();
+        model.addAttribute("meetingsDTO", meetingsDTO);
+        model.addAttribute("myProjects", projectService.myProjects(user.getName()));
+        model.addAttribute("allUsers", csUserService.getAllUsers());
+        model.addAttribute("currentUser", user.getName());
+        return "user/meetingDirect";
+    }
 
     @GetMapping("/inviteForm")
     public String inviteForMeeting(@RequestParam("messageId") Integer messageId ,  Model model) {
