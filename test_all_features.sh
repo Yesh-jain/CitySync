@@ -29,7 +29,7 @@ login() {
     local cookie_jar=$3
     curl -s -c "$cookie_jar" "$BASE_URL/login" > /dev/null
     local HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -c "$cookie_jar" -b "$cookie_jar" \
-        -X POST "$BASE_URL/login" \
+        "$BASE_URL/login" \
         -d "username=${user}&password=${pass}" \
         -L)
     echo "$HTTP_CODE"
@@ -90,7 +90,7 @@ BAD_COOKIES="$TMPDIR_TEST/bad.cookies"
 curl -s -c "$BAD_COOKIES" "$BASE_URL/login" > /dev/null
 BAD_BODY="$TMPDIR_TEST/bad_body.html"
 BAD_CODE=$(curl -s -o "$BAD_BODY" -w "%{http_code}" -b "$BAD_COOKIES" -c "$BAD_COOKIES" \
-    -X POST "$BASE_URL/login" \
+    "$BASE_URL/login" \
     -d "username=wrong&password=wrong" -L)
 if grep -qi "error\|invalid\|incorrect\|Bad credentials" "$BAD_BODY" 2>/dev/null || [[ "$BAD_CODE" == "200" ]]; then
     pass "Bad credentials rejected → stays on login page"
@@ -264,12 +264,13 @@ section "7. MY PROJECT RESPONSES"
 # ============================================================
 
 # Extract projectId from My Projects page
-PROJECT_ID=$(grep -o 'projectId=[0-9]*' "$MY_PROJECTS_FILE" 2>/dev/null | head -1 | sed 's/projectId=//')
+PROJECT_ID=$(grep -o 'name="projectId" value="[0-9]*"' "$MY_PROJECTS_FILE" 2>/dev/null | head -1 | sed 's/.*value="\([0-9]*\)".*/\1/')
 
 if [[ -n "$PROJECT_ID" ]]; then
     echo "  Found projectId=$PROJECT_ID"
     RESULT=$(get_page "/user/messages/myProjects-Response?projectId=$PROJECT_ID" "$USER_COOKIES")
     CODE=${RESULT%%|*}; BODY_FILE=${RESULT##*|}
+    RESPONSES_BODY_FILE="$BODY_FILE"
     if [[ "$CODE" == "200" ]]; then
         pass "My Project Responses page loads for projectId=$PROJECT_ID"
         if grep -qi "APPROVE" "$BODY_FILE" 2>/dev/null; then
@@ -290,21 +291,20 @@ else
 fi
 
 # ============================================================
-section "8. SCHEDULE MEETING (from Approved Messages)"
+section "8. SCHEDULE MEETING (from Collaboration Responses)"
 # ============================================================
 
-RESULT=$(get_page "/user/messages/ApprovedMessages" "$USER2_COOKIES")
-CODE=${RESULT%%|*}; BODY_FILE=${RESULT##*|}
-APPROVED_MSG_ID=$(grep -o 'messageId=[0-9]*' "$BODY_FILE" 2>/dev/null | head -1 | sed 's/messageId=//')
+# Extract collab messageId from the submitter's project responses page
+COLLAB_MSG_ID=$(grep -o 'name="messageId" value="[0-9]*"' "$RESPONSES_BODY_FILE" 2>/dev/null | head -1 | sed 's/.*value="\([0-9]*\)".*/\1/')
 
-if [[ -n "$APPROVED_MSG_ID" ]]; then
-    echo "  Found approved messageId=$APPROVED_MSG_ID"
+if [[ -n "$COLLAB_MSG_ID" ]]; then
+    echo "  Found collab messageId=$COLLAB_MSG_ID"
     
-    # Load meeting invite form
-    RESULT=$(get_page "/user/meetings/inviteForm?messageId=$APPROVED_MSG_ID" "$USER2_COOKIES")
+    # Load meeting invite form (using USER_COOKIES since the project creator is scheduling the meeting)
+    RESULT=$(get_page "/user/meetings/inviteForm?messageId=$COLLAB_MSG_ID" "$USER_COOKIES")
     CODE=${RESULT%%|*}; BODY_FILE=${RESULT##*|}
     if [[ "$CODE" == "200" ]] && grep -qi "meeting\|invite\|date\|link" "$BODY_FILE" 2>/dev/null; then
-        pass "Meeting invite form loads for messageId=$APPROVED_MSG_ID"
+        pass "Meeting invite form loads for messageId=$COLLAB_MSG_ID"
     else
         fail "Meeting invite form → HTTP $CODE"
     fi
@@ -315,15 +315,15 @@ if [[ -n "$APPROVED_MSG_ID" ]]; then
 
     echo "  Meeting form: projectId=$MEET_PROJECT_ID, participant=$MEET_PARTICIPANT"
 
-    MEETING_DATA="messageId=$APPROVED_MSG_ID&projectId=$MEET_PROJECT_ID&participatingUser=$MEET_PARTICIPANT&meetingDate=2026-07-15&meetingStartTime=10:00&meetingEndTime=11:00&link=https://meet.google.com/abc-def-ghi"
-    MEET_CODE=$(post_form "/user/meetings/invite" "$MEETING_DATA" "$USER2_COOKIES")
+    MEETING_DATA="messageId=$COLLAB_MSG_ID&projectId=$MEET_PROJECT_ID&participatingUser=$MEET_PARTICIPANT&meetingDate=2026-07-15&meetingStartTime=10:00&meetingEndTime=11:00&link=https://meet.google.com/abc-def-ghi"
+    MEET_CODE=$(post_form "/user/meetings/invite" "$MEETING_DATA" "$USER_COOKIES")
     if [[ "$MEET_CODE" == "302" ]]; then
-        pass "Meeting invitation submitted → redirect $MEET_CODE"
+        pass "Meeting invitation submitted by creator → redirect $MEET_CODE"
     else
         fail "Meeting invitation submission → HTTP $MEET_CODE"
     fi
 else
-    warn "No approved message found to test meeting invite"
+    warn "No collab message found to test meeting invite"
 fi
 
 # ============================================================
@@ -385,7 +385,7 @@ if [[ -n "$PROJECT_ID" ]]; then
     fi
 
     # Extract resource ID
-    RESOURCE_ID=$(grep -o 'name="usedResource\[0\]\.resourceId"[^>]*value="[0-9]*"' "$BODY_FILE" 2>/dev/null | head -1 | sed 's/.*value="\([0-9]*\)".*/\1/')
+    RESOURCE_ID=$(grep -A 1 'name="usedResource\[0\]\.resourceId"' "$BODY_FILE" 2>/dev/null | grep -o 'value="[0-9]*"' | head -1 | sed 's/value="//;s/"//')
     
     if [[ -n "$RESOURCE_ID" ]]; then
         echo "  Found resourceId=$RESOURCE_ID"
@@ -398,10 +398,10 @@ if [[ -n "$PROJECT_ID" ]]; then
         fi
 
         # Verify COMPLETED status
-        RESULT=$(get_page "/user/project/showProjects" "$USER_COOKIES")
+        RESULT=$(get_page "/user/project/myProjects" "$USER_COOKIES")
         CODE=${RESULT%%|*}; BODY_FILE=${RESULT##*|}
-        if grep -qi "COMPLETED" "$BODY_FILE" 2>/dev/null; then
-            pass "Project status is now COMPLETED in Show Projects"
+        if grep -qi "Finished" "$BODY_FILE" 2>/dev/null; then
+            pass "Project status is now COMPLETED (Finished) in My Projects"
         else
             warn "COMPLETED status not found (may need different HTML check)"
         fi
@@ -546,10 +546,10 @@ else
     warn "Logout → HTTP $LOGOUT_CODE"
 fi
 
-# After logout, /user should redirect to login
+# After logout, /user should redirect to login (HTTP 302 redirect or login page rendered)
 RESULT=$(get_page "/user" "$USER_COOKIES")
 CODE=${RESULT%%|*}; BODY_FILE=${RESULT##*|}
-if grep -qi "login\|sign in\|username" "$BODY_FILE" 2>/dev/null; then
+if [[ "$CODE" == "302" ]] || grep -qi "login\|sign in\|username" "$BODY_FILE" 2>/dev/null; then
     pass "After logout, /user redirects to login page"
 else
     warn "Post-logout redirect check inconclusive"
